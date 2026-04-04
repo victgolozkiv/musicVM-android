@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pure_black">#000000</color>
+    <color name="dark_grey">#121212</color>
+    <color name="purple_primary">#BB86FC</color>
+    <color name="purple_variant">#3700B3</color>
+    <color name="purple_accent">#7C4DFF</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_grey">#B3FFFFFF</color>
+    
+    <!-- Para compatibilidad con los layouts existentes -->
+    <color name="primary_color">#BB86FC</color>
+    <color name="background_color">#000000</color>
+    <color name="card_background">#121212</color>
+</resources>

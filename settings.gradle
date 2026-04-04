@@ -1,0 +1,2 @@
+rootProject.name = "reoroductor-java"
+include ':app'
