@@ -16,7 +16,7 @@ Si este reproductor te gusta o te ha sido útil, ¡considera invitarme un café!
 
 ---
 
-## ✨ Características Premium (v3.0)
+## ✨ Características Experimentales (v3.0)
 
 *   **🎙️ Letras Sincronizadas (Karaoke Engine):** Integración con la API de `LRCLib` con parseo en tiempo real. La interfaz muestra la letra de la canción al exacto milisegundo de ejecución (a 4 fotogramas por segundo).
 *   **☁️ Smart Offline Auto-Cache:** Ahorra datos celulares. Toda canción reproducida se fragmenta y auto-guarda dinámicamente en disco (hasta 500MB). Además, la vista de descargas te separa de manera inteligente tus `MP3s Locales` del `Caché Remoto`, permitiéndote reproducir en entornos sin red.
