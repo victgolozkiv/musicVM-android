@@ -19,6 +19,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:checkedButton="@+id/btnPhysical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvDownloadsTitle">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPhysical"
+            style="?attr/materialButtonOutlinedStyle"
+            android:textColor="@color/text_white"
+            app:strokeColor="@color/text_grey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Archivos Locales" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCache"
+            style="?attr/materialButtonOutlinedStyle"
+            android:textColor="@color/text_white"
+            app:strokeColor="@color/text_grey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="☁️ Caché Remoto" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/downloadsRecyclerView"
         android:layout_width="0dp"
@@ -29,7 +60,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvDownloadsTitle"
+        app:layout_constraintTop_toBottomOf="@id/toggleGroup"
         tools:listitem="@layout/item_song" />
 
     <TextView

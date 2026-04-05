@@ -22,6 +22,7 @@ public class Song {
     public String getId() { return id; }
     public String getTitle() { return title; }
     public String getArtist() { return artist; }
+    public void setArtist(String artist) { this.artist = artist; }
     public String getUrl() { return url; }
     public String getStreamUrl() { return streamUrl; }
     public void setStreamUrl(String streamUrl) { this.streamUrl = streamUrl; }

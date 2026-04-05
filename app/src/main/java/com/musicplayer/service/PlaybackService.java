@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
+import androidx.media3.common.ForwardingPlayer;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.datasource.DefaultHttpDataSource;
@@ -21,6 +22,12 @@ import androidx.media3.session.MediaSession;
 import androidx.media3.session.MediaSessionService;
 import com.musicplayer.repository.MusicRepository;
 import com.musicplayer.ui.MainActivity;
+import androidx.media3.datasource.cache.CacheDataSource;
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor;
+import androidx.media3.datasource.cache.SimpleCache;
+import androidx.media3.database.StandaloneDatabaseProvider;
+import android.media.audiofx.Equalizer;
+import java.io.File;
 import java.util.List;
 
 public class PlaybackService extends MediaSessionService {
@@ -31,6 +38,14 @@ public class PlaybackService extends MediaSessionService {
     private ExoPlayer player;
     private MediaSession mediaSession;
     private MusicRepository repository;
+    
+    // Phase 1: Engine Foundation
+    private static SimpleCache simpleCache;
+    public static Equalizer equalizer;
+    
+    public static SimpleCache getCache() {
+        return simpleCache;
+    }
 
     @Override
     public void onCreate() {
@@ -40,6 +55,15 @@ public class PlaybackService extends MediaSessionService {
         
         createNotificationChannel();
         startForegroundWithStatus("Iniciando...", "Preparando reproductor de música");
+
+        // --- SMART CACHE (Offline Auto-Cache) ---
+        if (simpleCache == null) {
+            File cacheDir = new File(getCacheDir(), "media3_cache");
+            LeastRecentlyUsedCacheEvictor evictor = new LeastRecentlyUsedCacheEvictor(500 * 1024 * 1024); // 500 MB max
+            StandaloneDatabaseProvider databaseProvider = new StandaloneDatabaseProvider(this);
+            simpleCache = new SimpleCache(cacheDir, evictor, databaseProvider);
+            Log.d(TAG, "Service: 🧠 Smart Cache (500MB) configurado.");
+        }
 
         // --- MOTOR DE RED NITRO (OkHttp) ---
         okhttp3.OkHttpClient okHttpClient = new okhttp3.OkHttpClient.Builder()
@@ -78,17 +102,40 @@ public class PlaybackService extends MediaSessionService {
                         1000   // Buffer for playback after rebuffer 1s
                 ).build();
  
+        // --- CACHE ROUTING ---
+        CacheDataSource.Factory cacheDataSourceFactory = new CacheDataSource.Factory()
+                .setCache(simpleCache)
+                .setUpstreamDataSourceFactory(resolvingDataSourceFactory) // Intercept network misses to cache them
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR);
+
         player = new ExoPlayer.Builder(this)
-                .setMediaSourceFactory(new DefaultMediaSourceFactory(resolvingDataSourceFactory))
+                .setMediaSourceFactory(new DefaultMediaSourceFactory(cacheDataSourceFactory))
                 .setLoadControl(loadControl)
                 .setAudioAttributes(AudioAttributes.DEFAULT, true)
                 .setHandleAudioBecomingNoisy(true)
                 .build();
         
-        // ASEGURAR QUE SIEMPRE AVANCE AL SIGUIENTE TEMA
-        player.setRepeatMode(Player.REPEAT_MODE_OFF);
+        // ASEGURAR QUE HAGA BUCLE SI SOLO HAY UN TEMA
+        player.setRepeatMode(Player.REPEAT_MODE_ALL);
 
         player.addListener(new Player.Listener() {
+            @Override
+            public void onAudioSessionIdChanged(int audioSessionId) {
+                Log.d(TAG, "Service: AudioSessionId changed to " + audioSessionId);
+                try {
+                    if (equalizer != null) {
+                        equalizer.release();
+                    }
+                    if (audioSessionId != C.AUDIO_SESSION_ID_UNSET) {
+                        equalizer = new Equalizer(0, audioSessionId);
+                        equalizer.setEnabled(true);
+                        Log.d(TAG, "Service: 🎛️ Equalizer bound to session " + audioSessionId);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Service: Failed to bind Equalizer", e);
+                }
+            }
+
             @Override
             public void onMediaMetadataChanged(androidx.media3.common.MediaMetadata mediaMetadata) {
                 Log.d(TAG, "Service: Cambio de metadata detectado");
@@ -103,15 +150,15 @@ public class PlaybackService extends MediaSessionService {
                     startForegroundWithStatus(title, "Preparando audio...");
                 } else if (state == Player.STATE_READY) {
                     updateNotificationWithMetadata(player.getMediaMetadata());
-                    // PRE-CARGA PROACTIVA DEL SIGUIENTE TEMA 🚀
-                    prefetchNextTrack();
+                    // PRE-CARGA PROACTIVA DE LOS SIGUIENTES TEMAS 🚀
+                    prefetchNextTracks();
                 }
             }
 
             @Override
             public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
                 if (mediaItem != null) {
-                    prefetchNextTrack();
+                    prefetchNextTracks();
                     
                     // --- QUEUE GUARD: Mantener siempre al menos 3 temas por delante ---
                     int currentIdx = player.getCurrentMediaItemIndex();
@@ -128,31 +175,97 @@ public class PlaybackService extends MediaSessionService {
             @Override
             public void onPlayerError(androidx.media3.common.PlaybackException error) {
                 Log.e(TAG, "Service: Error motor -> " + error.getMessage());
+                // Si falla el JIT o URL, auto saltar a la siguiente.
+                if (player.hasNextMediaItem()) {
+                    Log.d(TAG, "Service: Auto-skipping to next due to error.");
+                    player.seekToNextMediaItem();
+                    player.prepare();
+                    player.play();
+                }
             }
         });
 
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-        mediaSession = new MediaSession.Builder(this, player)
+        ForwardingPlayer forwardingPlayer = new ForwardingPlayer(player) {
+            @Override
+            public Player.Commands getAvailableCommands() {
+                return super.getAvailableCommands().buildUpon()
+                        .add(Player.COMMAND_SEEK_TO_NEXT)
+                        .add(Player.COMMAND_SEEK_TO_PREVIOUS)
+                        .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                        .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                        .build();
+            }
+
+            @Override
+            public boolean isCommandAvailable(int command) {
+                if (command == Player.COMMAND_SEEK_TO_NEXT || command == Player.COMMAND_SEEK_TO_PREVIOUS ||
+                    command == Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM || command == Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM) {
+                    return true;
+                }
+                return super.isCommandAvailable(command);
+            }
+
+            @Override
+            public boolean hasNextMediaItem() {
+                return true;
+            }
+
+            @Override
+            public boolean hasPreviousMediaItem() {
+                return true;
+            }
+
+            @Override
+            public void seekToNextMediaItem() {
+                super.seekToNextMediaItem();
+            }
+
+            @Override
+            public void seekToPreviousMediaItem() {
+                super.seekToPreviousMediaItem();
+            }
+
+            @Override
+            public void seekToNext() {
+                seekToNextMediaItem();
+            }
+
+            @Override
+            public void seekToPrevious() {
+                seekToPreviousMediaItem();
+            }
+        };
+
+        mediaSession = new MediaSession.Builder(this, forwardingPlayer)
                 .setSessionActivity(pendingIntent)
                 .build();
     }
 
-    private void prefetchNextTrack() {
+    private void prefetchNextTracks() {
         int nextIndex = player.getNextMediaItemIndex();
-        if (nextIndex != C.INDEX_UNSET) {
+        int count = 0;
+        // Pre-cargar hasta 3 temas por adelantado en paralelo para máxima velocidad
+        while (nextIndex != C.INDEX_UNSET && count < 3) {
             MediaItem nextItem = player.getMediaItemAt(nextIndex);
             if (nextItem.localConfiguration != null) {
                 String nextUrl = nextItem.localConfiguration.uri.toString();
                 if (nextUrl.contains("youtube.com") || nextUrl.contains("youtu.be")) {
-                    Log.d(TAG, "Service: 🚀 Pre-cargando (URL Cache) el siguiente tema -> " + nextUrl);
+                    Log.d(TAG, "Service: 🚀 Pre-cargando (URL Cache) tema -> " + nextUrl);
                     repository.getStreamUrl(nextUrl, new MusicRepository.StreamCallback() {
                         @Override public void onSuccess(String streamUrl) {} // Ya queda en caché
                         @Override public void onError(Exception e) {}
                     });
                 }
             }
+            if (nextIndex < player.getMediaItemCount() - 1) {
+                nextIndex++;
+            } else {
+                nextIndex = C.INDEX_UNSET;
+            }
+            count++;
         }
     }
 
@@ -166,17 +279,19 @@ public class PlaybackService extends MediaSessionService {
             public void onSuccess(List<com.musicplayer.model.Song> songs) {
                 if (songs != null && !songs.isEmpty()) {
                     Log.d(TAG, "Service: ✅ Se añadieron " + songs.size() + " temas similares a la cola!");
-                    for (com.musicplayer.model.Song song : songs) {
-                        MediaItem.Builder builder = new MediaItem.Builder()
-                                .setUri(song.getUrl())
-                                .setMediaId(song.getId())
-                                .setMediaMetadata(new androidx.media3.common.MediaMetadata.Builder()
-                                        .setTitle(song.getTitle())
-                                        .setArtist(song.getArtist())
-                                        .setArtworkUri(android.net.Uri.parse(song.getThumbnailUrl()))
-                                        .build());
-                        player.addMediaItem(builder.build());
-                    }
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        for (com.musicplayer.model.Song song : songs) {
+                            MediaItem.Builder builder = new MediaItem.Builder()
+                                    .setUri(song.getUrl())
+                                    .setMediaId(song.getId())
+                                    .setMediaMetadata(new androidx.media3.common.MediaMetadata.Builder()
+                                            .setTitle(song.getTitle())
+                                            .setArtist(song.getArtist())
+                                            .setArtworkUri(android.net.Uri.parse(song.getThumbnailUrl()))
+                                            .build());
+                            player.addMediaItem(builder.build());
+                        }
+                    });
                 }
             }
             @Override
@@ -245,6 +360,11 @@ public class PlaybackService extends MediaSessionService {
     public void onDestroy() {
         if (player != null) player.release();
         if (mediaSession != null) mediaSession.release();
+        if (equalizer != null) {
+            equalizer.release();
+            equalizer = null;
+        }
+        // No liberar el SimpleCache porque es estático y bloquea el dir si se regenera
         super.onDestroy();
     }
 }

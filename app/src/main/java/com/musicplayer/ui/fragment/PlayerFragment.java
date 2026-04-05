@@ -31,6 +31,9 @@ import com.musicplayer.model.Song;
 import com.musicplayer.service.PlaybackService;
 import com.musicplayer.ui.MainActivity;
 import com.musicplayer.ui.viewmodel.MusicViewModel;
+import com.musicplayer.repository.LyricsRepository;
+import com.musicplayer.utils.LrcParser;
+import java.util.List;
 
 public class PlayerFragment extends Fragment {
     private static final String TAG = "DEBUG_PLAYER";
@@ -42,15 +45,16 @@ public class PlayerFragment extends Fragment {
     private Slider slider;
     private FloatingActionButton btnPlayPause;
     private ImageButton btnDismiss, btnNext, btnPrev;
-    private TextView tvCurrentTime, tvTotalTime;
+    private TextView tvCurrentTime, tvTotalTime, tvCurrentLyric;
     private ObjectAnimator discAnimator;
+    private List<LrcParser.LrcLine> currentLyrics;
     
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable updateProgressAction = new Runnable() {
         @Override
         public void run() {
             updateProgress();
-            handler.postDelayed(this, 1000);
+            handler.postDelayed(this, 250); // Resolución táctica de 250ms para fluidez de letras
         }
     };
 
@@ -81,6 +85,7 @@ public class PlayerFragment extends Fragment {
         btnPrev = view.findViewById(R.id.btnPrev);
         tvCurrentTime = view.findViewById(R.id.tvCurrentTime);
         tvTotalTime = view.findViewById(R.id.tvTotalTime);
+        tvCurrentLyric = view.findViewById(R.id.tvCurrentLyric);
 
         // Habilitar Marquee
         tvTitle.setSelected(true);
@@ -206,6 +211,19 @@ public class PlayerFragment extends Fragment {
 
                 tvCurrentTime.setText(formatTime(position));
                 tvTotalTime.setText(formatTime(duration));
+                
+                // --- LRCLib Lyrical Interpolator ---
+                if (currentLyrics != null && !currentLyrics.isEmpty()) {
+                    String activeLyric = "♪";
+                    for (int i = 0; i < currentLyrics.size(); i++) {
+                        if (position >= currentLyrics.get(i).timeMs) {
+                            activeLyric = currentLyrics.get(i).text;
+                        } else {
+                            break;
+                        }
+                    }
+                    tvCurrentLyric.setText(activeLyric != null && !activeLyric.isEmpty() ? activeLyric : "♪");
+                }
             } catch (Exception ignored) {}
         }
     }
@@ -259,6 +277,32 @@ public class PlayerFragment extends Fragment {
                     @Override
                     public void onLoadCleared(@Nullable android.graphics.drawable.Drawable placeholder) {}
                 });
+
+            // --- FASE 3: Lyrics Fetching ---
+            tvCurrentLyric.setText("♪ Buscando letras... ♪");
+            currentLyrics = null;
+            LyricsRepository.getInstance().fetchLyrics(song.getTitle(), song.getArtist(), new LyricsRepository.LyricsCallback() {
+                @Override
+                public void onSuccess(String syncedLyrics, String plainLyrics) {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(() -> {
+                        if (syncedLyrics != null && !syncedLyrics.isEmpty()) {
+                            currentLyrics = LrcParser.parseLrc(syncedLyrics);
+                            tvCurrentLyric.setText("♪ Letras sincronizadas ♪");
+                        } else if (plainLyrics != null && !plainLyrics.isEmpty()) {
+                            tvCurrentLyric.setText("Letras encontradas pero sin sincronización visual");
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(() -> {
+                        tvCurrentLyric.setText(""); // Ocultar si no hay letras
+                    });
+                }
+            });
         });
     }
 

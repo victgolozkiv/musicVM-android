@@ -36,9 +36,9 @@ public interface MusicDao {
     @Insert
     void insertSearch(SearchHistory history);
     
-    @Query("SELECT keyword FROM search_history ORDER BY timestamp DESC LIMIT 50")
+    @Query("SELECT keyword FROM search_history ORDER BY timestamp DESC LIMIT 10")
     List<String> getRecentKeywords();
 
-    @Query("SELECT keyword FROM search_history GROUP BY keyword ORDER BY COUNT(*) DESC LIMIT 5")
+    @Query("SELECT keyword FROM search_history GROUP BY keyword ORDER BY COUNT(*) DESC LIMIT 10")
     List<String> getTopKeywords();
 }

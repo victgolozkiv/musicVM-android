@@ -57,27 +57,21 @@ public class MusicRepository {
 
                 Log.d(TAG, "Repo: ⚡ Buscando con NewPipeExtractor (Nativo/Rápido) -> " + query);
                 // Usar NewPipeExtractor para búsqueda Java nativa (< 1s)
-                StreamingService service = ServiceList.YouTube;
-                SearchInfo searchInfo = SearchInfo.getInfo(service, service.getSearchQHFactory().fromQuery(query));
+                String musicQuery = query;
+                String lowerQuery = query.toLowerCase();
                 
-                List<Song> songs = new ArrayList<>();
-                for (org.schabi.newpipe.extractor.InfoItem item : searchInfo.getRelatedItems()) {
-                    if (item instanceof StreamInfoItem) {
-                        StreamInfoItem streamItem = (StreamInfoItem) item;
-                        String id = streamItem.getUrl().split("v=")[1];
-                        String thumb = streamItem.getThumbnails().isEmpty() ? "" : streamItem.getThumbnails().get(0).getUrl();
-                        
-                        songs.add(new Song(
-                            id,
-                            streamItem.getName(),
-                            streamItem.getUploaderName(),
-                            streamItem.getUrl(),
-                            (int) streamItem.getDuration(),
-                            thumb
-                        ));
-                    }
-                    if (songs.size() >= 15) break;
+                // Forzar música y excluir contenido no musical (AGRESIVO 3.0)
+                if (!lowerQuery.contains("lyrics") && !lowerQuery.contains("song") && !lowerQuery.contains("audio")) {
+                    musicQuery += " music official audio lyrics";
                 }
+                
+                // Exclusión masiva de contenido de viajes, blogs y noticias
+                musicQuery += " -vlog -blog -tutorial -news -tour -trip -viaje -docu -hotel -resort -guide -walking -beach -paradise -resumen -noticias -vistas";
+                
+                StreamingService service = ServiceList.YouTube;
+                SearchInfo searchInfo = SearchInfo.getInfo(service, service.getSearchQHFactory().fromQuery(musicQuery));
+                
+                List<Song> songs = processNewPipeItems(searchInfo.getRelatedItems());
 
                 Log.d(TAG, "Repo: ✓ NewPipe encontró " + songs.size() + " resultados al instante!");
                 callback.onSuccess(songs);
@@ -105,32 +99,54 @@ public class MusicRepository {
         executor.execute(() -> {
             try {
                 List<String> topKeywords = musicDao.getTopKeywords();
-                if (topKeywords.isEmpty()) {
-                    // Fallback a algo aleatorio si no hay historia
-                    String[] seeds = {"Victor Medevil", "Top Hits 2024", "Reggaeton Mix", "Rock Classics"};
-                    String query = seeds[new Random().nextInt(seeds.length)];
-                    searchSongs(query, callback);
-                    return;
+                List<String> recentKeywords = musicDao.getRecentKeywords();
+                
+                Set<String> uniqueKeywords = new HashSet<>();
+                if (topKeywords != null) uniqueKeywords.addAll(topKeywords);
+                if (recentKeywords != null) uniqueKeywords.addAll(recentKeywords);
+                
+                List<String> combinedKeywords = new ArrayList<>(uniqueKeywords);
+                Collections.shuffle(combinedKeywords);
+                
+                if (combinedKeywords.isEmpty()) {
+                    String[] seeds = {
+                        "Pop Hits 2024", "Reggaeton Mix", "Rock Classics", 
+                        "Electronic Dance Music", "Hip Hop Beats", "Jazz Relax", 
+                        "Classical Masterpieces", "R&B Soul", "Acoustic Covers", "Lo-Fi Study Beats"
+                    };
+                    List<String> seedList = new ArrayList<>(java.util.Arrays.asList(seeds));
+                    Collections.shuffle(seedList);
+                    combinedKeywords.addAll(seedList.subList(0, 3));
                 }
 
                 Set<String> seenTitles = new HashSet<>();
                 List<Song> finalMix = new ArrayList<>();
-                int numKeywords = Math.min(topKeywords.size(), 5); // Aumentado a 5 para más variedad
+                int numKeywords = Math.min(combinedKeywords.size(), 12);
                 java.util.concurrent.atomic.AtomicInteger counter = new java.util.concurrent.atomic.AtomicInteger(0);
 
                 for (int i = 0; i < numKeywords; i++) {
-                    String keyword = topKeywords.get(i);
+                    String keyword = combinedKeywords.get(i);
+                    String musicKeyword = keyword;
+                    if (!keyword.toLowerCase().contains("music") && !keyword.toLowerCase().contains("song")) {
+                        musicKeyword += " music official";
+                    }
+                    
+                    // Exclusión masiva de contenido de viajes, blogs y noticias (V3 ULTRA - REFORZADO)
+                    musicKeyword += " -vlog -blog -tutorial -news -tour -trip -viaje -docu -hotel -resort -guide -walking -beach -paradise -resumen -noticias -vistas";
+                    
+                    final String finalKeyword = musicKeyword;
+                    
                     executor.execute(() -> {
                         try {
                             StreamingService service = ServiceList.YouTube;
-                            SearchInfo searchInfo = SearchInfo.getInfo(service, service.getSearchQHFactory().fromQuery(keyword));
+                            SearchInfo searchInfo = SearchInfo.getInfo(service, service.getSearchQHFactory().fromQuery(finalKeyword));
                             List<Song> results = processNewPipeItems(searchInfo.getRelatedItems());
                             
                             synchronized (finalMix) {
-                                // Tomar solo los mejores 4 de cada keyword para forzar mezcla de géneros
+                                // Tomar abundantes de cada keyword para scroll eterno
                                 int countPerKeyword = 0;
                                 for (Song s : results) {
-                                    if (countPerKeyword >= 4) break;
+                                    if (countPerKeyword >= 8) break;
                                     String normalized = normalizeTitle(s.getTitle());
                                     if (!seenTitles.contains(normalized)) {
                                         seenTitles.add(normalized);
@@ -161,19 +177,52 @@ public class MusicRepository {
         for (org.schabi.newpipe.extractor.InfoItem item : items) {
             if (item instanceof StreamInfoItem) {
                 StreamInfoItem streamItem = (StreamInfoItem) item;
+                long duration = streamItem.getDuration();
+                String title = streamItem.getName().toLowerCase();
+                String uploader = streamItem.getUploaderName().toLowerCase();
+                
+                // --- FILTRO DE IDENTIDAD MUSICAL (ULTRA-STRICT) ---
+                
+                if (duration < 90 || duration > 480) {
+                    Log.d("RepoFilter", "🚫 Duración inválida (" + duration + "s): " + streamItem.getName());
+                    continue; 
+                }
+
+                // 2. Filtro de Palabras Prohibidas (Deep Scan)
+                boolean isNonMusic = title.contains("vlog") || title.contains("blog") || title.contains("tutorial") || 
+                                   title.contains("news") || title.contains("noticias") || title.contains("resumen") ||
+                                   title.contains("travel") || title.contains("viaje") || title.contains("hotel") ||
+                                   title.contains("resort") || title.contains("beach") || title.contains("guia") ||
+                                   title.contains("walking") || title.contains("tour");
+                
+                if (isNonMusic) {
+                    Log.d("RepoFilter", "🚫 Palabra prohibida detectada: " + streamItem.getName());
+                    continue;
+                }
+
+                // 3. Prioridad: Canales Oficiales o Título musical
+                boolean isOfficialMusic = uploader.contains("topic") || uploader.contains("vevo") || 
+                                        title.contains("official") || title.contains("audio") || 
+                                        title.contains("lyrics") || title.contains("video");
+                
+                if (!isOfficialMusic) {
+                    Log.d("RepoFilter", "🚫 No es música oficial/identificada: " + streamItem.getName() + " (Uploader: " + streamItem.getUploaderName() + ")");
+                    continue; 
+                }
+
                 String id = streamItem.getUrl().contains("v=") ? streamItem.getUrl().split("v=")[1] : "id_" + System.currentTimeMillis();
-                String thumb = streamItem.getThumbnails().isEmpty() ? "" : streamItem.getThumbnails().get(0).getUrl();
+                String thumb = streamItem.getUrl().contains("youtu") ? "https://img.youtube.com/vi/" + id + "/maxresdefault.jpg" : (streamItem.getThumbnails().isEmpty() ? "" : streamItem.getThumbnails().get(0).getUrl());
                 
                 songs.add(new Song(
                     id,
                     streamItem.getName(),
                     streamItem.getUploaderName(),
                     streamItem.getUrl(),
-                    (int) streamItem.getDuration(),
+                    (int) duration,
                     thumb
                 ));
             }
-            if (songs.size() >= 15) break;
+            if (songs.size() >= 45) break; 
         }
         return songs;
     }
@@ -285,32 +334,18 @@ public class MusicRepository {
                 Log.d(TAG, "Repo: 🔄 Buscando temas relacionados para -> " + url);
                 org.schabi.newpipe.extractor.stream.StreamInfo info = org.schabi.newpipe.extractor.stream.StreamInfo.getInfo(ServiceList.YouTube, url);
                 
-                Set<String> seenTitles = new HashSet<>();
-                List<Song> related = new ArrayList<>();
-                for (org.schabi.newpipe.extractor.InfoItem item : info.getRelatedItems()) {
-                    if (item instanceof StreamInfoItem) {
-                        StreamInfoItem streamItem = (StreamInfoItem) item;
-                        String id = streamItem.getUrl().contains("v=") ? streamItem.getUrl().split("v=")[1] : streamItem.getUrl();
-                        String thumb = streamItem.getThumbnails().isEmpty() ? "" : streamItem.getThumbnails().get(0).getUrl();
-                        
-                        String normalized = normalizeTitle(streamItem.getName());
-                        if (!seenTitles.contains(normalized)) {
-                            seenTitles.add(normalized);
-                            related.add(new Song(
-                                id,
-                                streamItem.getName(),
-                                streamItem.getUploaderName(),
-                                streamItem.getUrl(),
-                                (int) streamItem.getDuration(),
-                                thumb
-                            ));
-                        }
-                    }
-                    if (related.size() >= 10) break;
+                List<Song> related = processNewPipeItems(info.getRelatedItems());
+                
+                if (related == null || related.isEmpty()) {
+                    Log.d(TAG, "Repo: ⚠️ La lista de canciones relacionadas vino vacía. Inyectando mix aleatorio de respaldo...");
+                    getPersonalizedMix(callback);
+                    return;
                 }
+                
                 callback.onSuccess(related);
             } catch (Exception e) {
-                callback.onError(e);
+                Log.e(TAG, "Repo: 🚫 Error extrayendo radio (" + e.getMessage() + "). Activando rescate con mix aleatorio...", e);
+                getPersonalizedMix(callback);
             }
         });
     }

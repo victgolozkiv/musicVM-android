@@ -27,6 +27,10 @@ public class DownloadsFragment extends Fragment {
     private MusicViewModel viewModel;
     private SongAdapter adapter;
     private TextView tvNoDownloads;
+    private TextView tvDownloadsTitle;
+    private List<Song> physicalSongs = new ArrayList<>();
+    private List<Song> cachedSongsList = new ArrayList<>();
+    private boolean showingCache = false;
 
     @Nullable
     @Override
@@ -41,7 +45,23 @@ public class DownloadsFragment extends Fragment {
         
         viewModel = new ViewModelProvider(requireActivity()).get(MusicViewModel.class);
         tvNoDownloads = view.findViewById(R.id.tvNoDownloads);
+        tvDownloadsTitle = view.findViewById(R.id.tvDownloadsTitle);
         RecyclerView recyclerView = view.findViewById(R.id.downloadsRecyclerView);
+        com.google.android.material.button.MaterialButtonToggleGroup toggleGroup = view.findViewById(R.id.toggleGroup);
+
+        toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                if (checkedId == R.id.btnPhysical) {
+                    showingCache = false;
+                    tvDownloadsTitle.setText("Descargas");
+                    displaySongs();
+                } else if (checkedId == R.id.btnCache) {
+                    showingCache = true;
+                    tvDownloadsTitle.setText("Caché Offline");
+                    displaySongs();
+                }
+            }
+        });
         
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         adapter = new SongAdapter(new SongAdapter.OnSongActionListener() {
@@ -132,7 +152,8 @@ public class DownloadsFragment extends Fragment {
     }
 
     private void loadLocalSongs() {
-        List<Song> localSongs = new ArrayList<>();
+        physicalSongs.clear();
+        cachedSongsList.clear();
         
         try {
             android.content.ContentResolver contentResolver = requireContext().getContentResolver();
@@ -184,7 +205,7 @@ public class DownloadsFragment extends Fragment {
                                     thumbUri
                                 );
                             song.setLocal(true);
-                            localSongs.add(song);
+                            physicalSongs.add(song);
                         }
                     } while (cursor.moveToNext());
                 }
@@ -193,14 +214,37 @@ public class DownloadsFragment extends Fragment {
             Log.e(TAG, "Error al cargar canciones desde MediaStore", e);
         }
         
-        Log.d(TAG, "loadLocalSongs: Encontradas " + localSongs.size() + " canciones en el dispositivo");
+        Log.d(TAG, "loadLocalSongs: Encontradas " + physicalSongs.size() + " canciones en el dispositivo");
         
-        if (localSongs.isEmpty()) {
+        // --- FASE 4: CACHE OFFLINE HISTORY ---
+        try {
+            androidx.media3.datasource.cache.SimpleCache cache = com.musicplayer.service.PlaybackService.getCache();
+            if (cache != null) {
+                java.util.Set<String> keys = cache.getKeys();
+                for (String key : keys) {
+                    Song cachedSong = com.musicplayer.utils.CacheMetadataManager.getMetadata(requireContext(), key);
+                    if (cachedSong != null) {
+                        cachedSong.setArtist(cachedSong.getArtist());
+                        cachedSongsList.add(cachedSong);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error cargando historia de cache offline", e);
+        }
+        
+        displaySongs();
+    }
+
+    private void displaySongs() {
+        List<Song> activeList = showingCache ? cachedSongsList : physicalSongs;
+        if (activeList.isEmpty()) {
             tvNoDownloads.setVisibility(View.VISIBLE);
+            tvNoDownloads.setText(showingCache ? "El caché de red está vacío" : "No hay archivos MP3 descargados");
             adapter.updateSongs(new ArrayList<>());
         } else {
             tvNoDownloads.setVisibility(View.GONE);
-            adapter.updateSongs(localSongs);
+            adapter.updateSongs(activeList);
         }
     }
 

@@ -108,9 +108,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openFullPlayer() {
+        PlayerFragment playerFragment = new PlayerFragment();
+        playerFragment.setSharedElementEnterTransition(androidx.transition.TransitionInflater.from(this).inflateTransition(android.R.transition.move));
+        
         getSupportFragmentManager().beginTransaction()
-            .setCustomAnimations(R.anim.slide_up, 0, 0, R.anim.slide_down)
-            .add(android.R.id.content, new PlayerFragment())
+            .setReorderingAllowed(true)
+            .addSharedElement(imgMiniPlayer, "cover_transition")
+            .add(android.R.id.content, playerFragment)
             .addToBackStack(null)
             .commit();
     }
@@ -156,9 +160,9 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (mediaController != null) {
                 // ESTRATEGIA DE ACTUALIZACIÓN SIN CORTES (GAPLESS UPDATE)
-                MediaItem currentlyPlaying = mediaController.getCurrentMediaItem();
-                if (currentlyPlaying != null && !playlist.isEmpty() && 
-                    currentlyPlaying.mediaId.equals(playlist.get(0).getId()) && startIndex == 0) {
+                int itemCount = mediaController.getMediaItemCount();
+                if (itemCount > 0 && !playlist.isEmpty() && 
+                    mediaController.getMediaItemAt(0).mediaId.equals(playlist.get(0).getId()) && startIndex == 0) {
                     
                     Log.d(TAG, "MainActivity: Actualizando cola sin interrumpir (Mode: Radio/Related)");
                     
@@ -261,6 +265,9 @@ public class MainActivity extends AppCompatActivity {
                                 thumb
                             );
                             viewModel.updateSelectedSong(song);
+                            
+                            // FASE 4: Guardar historial del Caché Offline
+                            com.musicplayer.utils.CacheMetadataManager.saveMetadata(MainActivity.this, song);
                         }
                     }
 
