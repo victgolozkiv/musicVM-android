@@ -8,13 +8,6 @@ A fully native, professional-grade Android Music Player architected on top of Go
 
 ---
 
-## ❤️ Apoya el Desarrollo
-
-Si este reproductor te gusta o te ha sido útil, ¡considera invitarme un café!.
-
-[![Donate PayPal](https://img.shields.io/badge/Donar_vía-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/paypalme/VictorRicardo162/1)
-
----
 
 ## ✨ Características Experimentales (v3.0)
 
@@ -48,3 +41,12 @@ Este proyecto usa la última versión de dependencias Gradle y Java puro sin dep
 ## ⚠️ Aviso Legal / Disclaimer
 
 Este proyecto es estrictamente de carácter **experimental** y educativo. El código fuente interactúa con plataformas y APIs de terceros ("As-Is"). **No se ofrece ninguna garantía**, y el autor no asume responsabilidad alguna por el mal uso que se le pueda dar. El uso de esta aplicación o código fuente y las consecuencias del mismo son responsabilidad y riesgo de cada usuario que decida implementarlo.
+
+## ❤️ Apoya el Desarrollo
+
+Si este reproductor te gusta o te ha sido útil, ¡considera invitarme un café!.
+
+[![Donate PayPal](https://img.shields.io/badge/Donar_vía-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/paypalme/VictorRicardo162/1)
+
+---
+
