@@ -10,7 +10,7 @@ A fully native, professional-grade Android Music Player architected on top of Go
 
 ## ❤️ Apoya el Desarrollo
 
-Si este reproductor te gusta o te ha sido útil, ¡considera invitarme un café! Todo el apoyo ayuda a mantener las APIs actualizadas y el desarrollo fluyendo.
+Si este reproductor te gusta o te ha sido útil, ¡considera invitarme un café!.
 
 [![Donate PayPal](https://img.shields.io/badge/Donar_vía-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/paypalme/VictorRicardo162/1)
 
