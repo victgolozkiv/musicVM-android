@@ -1,4 +1,4 @@
-anal# Native Android Music Player - Media3 Architecture
+# Native Android Music Player - Media3 Architecture
 
 ## Complete Migration Guide
 
