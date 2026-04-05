@@ -42,3 +42,9 @@ Este proyecto usa la última versión de dependencias Gradle y Java puro sin dep
 
 # El APK aparecerá en app/build/outputs/apk/debug/app-debug.apk
 ```
+
+---
+
+## ⚠️ Aviso Legal / Disclaimer
+
+Este proyecto es estrictamente de carácter **experimental** y educativo. El código fuente interactúa con plataformas y APIs de terceros ("As-Is"). **No se ofrece ninguna garantía**, y el autor no asume responsabilidad alguna por el mal uso que se le pueda dar. El uso de esta aplicación o código fuente y las consecuencias del mismo son responsabilidad y riesgo de cada usuario que decida implementarlo.
