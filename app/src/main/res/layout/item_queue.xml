@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:background="?attr/selectableItemBackground">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardArt"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/imgQueueArt"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            tools:src="@android:drawable/ic_menu_report_image" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/tvQueueTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="@color/text_white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tvQueueArtist"
+        app:layout_constraintEnd_toStartOf="@id/ivDragHandle"
+        app:layout_constraintStart_toEndOf="@id/cardArt"
+        app:layout_constraintTop_toTopOf="@id/cardArt"
+        tools:text="Queue Item Title" />
+
+    <TextView
+        android:id="@+id/tvQueueArtist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textColor="@color/purple_primary"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@id/cardArt"
+        app:layout_constraintEnd_toStartOf="@id/ivDragHandle"
+        app:layout_constraintStart_toStartOf="@id/tvQueueTitle"
+        app:layout_constraintTop_toBottomOf="@id/tvQueueTitle"
+        tools:text="Queue Item Artist" />
+
+    <ImageView
+        android:id="@+id/ivDragHandle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_sort_by_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/purple_accent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

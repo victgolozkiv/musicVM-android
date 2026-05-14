@@ -29,9 +29,10 @@
         app:tint="@color/text_white" />
 
     <TextView
+        android:id="@+id/tvPlayingNowLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reproduciendo"
+        android:text="@string/playing_now"
         android:textColor="@color/text_white"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -41,6 +42,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/btnDismiss" />
+
+    <ImageButton
+        android:id="@+id/btnCast"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="20dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="12dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_cast_premium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnDismiss"
+        app:tint="@color/text_white" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardDisc"
@@ -135,7 +149,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:text="0:00"
+        android:text="@string/time_zero"
         android:textColor="#80FFFFFF"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@id/playerSlider"
@@ -146,13 +160,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
-        android:text="0:00"
+        android:text="@string/time_zero"
         android:textColor="#80FFFFFF"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="@id/playerSlider"
         app:layout_constraintTop_toBottomOf="@id/playerSlider" />
 
     <LinearLayout
+        android:id="@+id/llControls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -161,39 +176,120 @@
         app:layout_constraintTop_toBottomOf="@id/tvCurrentTime">
 
         <ImageButton
-            android:id="@+id/btnPrev"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/circle_background"
-            android:backgroundTint="#4DFFFFFF"
-            android:padding="12dp"
+            android:id="@+id/btnQueue"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_prev_mod"
-            app:tint="@color/pure_black" />
+            android:src="@drawable/ic_playlist"
+            app:tint="@color/text_white" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabCustomSize="56dp"
+            app:backgroundTint="#1AFFFFFF"
+            app:tint="@color/text_white"
+            app:elevation="0dp"
+            app:hoveredFocusedTranslationZ="0dp"
+            app:pressedTranslationZ="4dp"
+            app:borderWidth="0dp"
+            app:rippleColor="#4DFFFFFF"
+            app:srcCompat="@drawable/ic_prev_mod" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnFullPlayPause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            app:backgroundTint="@color/text_white"
-            app:fabCustomSize="85dp"
-            app:maxImageSize="45dp"
+            android:layout_marginHorizontal="28dp"
+            app:backgroundTint="@color/purple_primary"
+            app:fabCustomSize="80dp"
+            app:maxImageSize="40dp"
             app:elevation="12dp"
+            app:hoveredFocusedTranslationZ="16dp"
+            app:pressedTranslationZ="20dp"
             app:srcCompat="@drawable/ic_play_mod"
-            app:tint="@color/pure_black"
+            app:tint="@color/text_white"
             app:borderWidth="0dp"/>
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnNext"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/circle_background"
-            android:backgroundTint="#4DFFFFFF"
-            android:padding="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fabCustomSize="56dp"
+            app:backgroundTint="#1AFFFFFF"
+            app:tint="@color/text_white"
+            app:elevation="0dp"
+            app:hoveredFocusedTranslationZ="0dp"
+            app:pressedTranslationZ="4dp"
+            app:borderWidth="0dp"
+            app:rippleColor="#4DFFFFFF"
+            app:srcCompat="@drawable/ic_next_mod" />
+            
+        <ImageButton
+            android:id="@+id/btnEqualizer"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_next_mod"
-            app:tint="@color/pure_black" />
+            android:src="@drawable/ic_equalizer"
+            app:tint="@color/text_white" />
     </LinearLayout>
+
+    <com.musicplayer.ui.view.VisualizerView
+        android:id="@+id/visualizerView"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- FULL LYRICS OVERLAY -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/llFullLyrics"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/pure_black"
+        android:visibility="gone"
+        android:elevation="100dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <ImageButton
+            android:id="@+id/btnCloseLyrics"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="20dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="@color/text_white"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lyrics_label"
+            android:textColor="@color/text_white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="@id/btnCloseLyrics"
+            app:layout_constraintBottom_toBottomOf="@id/btnCloseLyrics"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvLyrics"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            android:clipToPadding="false"
+            android:paddingBottom="100dp"
+            app:layout_constraintTop_toBottomOf="@id/btnCloseLyrics"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

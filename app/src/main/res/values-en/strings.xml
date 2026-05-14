@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Music</string>
+    <string name="search_hint">Search artists or songs</string>
+    <string name="home_greeting">Good Morning</string>
+    <string name="para_ti_title">For You (Daily Mix)</string>
+    <string name="playing_now">Now Playing</string>
+    <string name="lyrics_label">Lyrics</string>
+    <string name="downloads_title">Downloads</string>
+    <string name="local_files">Local Files</string>
+    <string name="remote_cache">Remote Cache</string>
+    <string name="no_downloads">No downloaded songs</string>
+    <string name="my_playlists">My Playlists</string>
+    <string name="new_playlist">+ New</string>
+    <string name="playlist_name_placeholder">Playlist Name</string>
+    <string name="empty_playlist">This playlist is empty</string>
+    <string name="next_in_queue">Next in Queue</string>
+    <string name="time_zero">0:00</string>
+</resources>

@@ -5,11 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="6dp"
-    app:cardBackgroundColor="@color/card_background"
+    app:cardBackgroundColor="@android:color/transparent"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
-    app:strokeColor="#1AFFFFFF"
-    app:strokeWidth="1dp">
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:strokeWidth="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -25,6 +27,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@android:drawable/ic_menu_report_image" />
+
+        <CheckBox
+            android:id="@+id/cbSelect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:buttonTint="@color/purple_primary" />
 
         <View
             android:layout_width="0dp"
@@ -48,9 +60,9 @@
             android:layout_height="32dp"
             android:layout_margin="8dp"
             android:background="@drawable/circle_background"
-            android:padding="6dp"
+            android:padding="7dp"
             android:scaleType="fitCenter"
-            android:src="@android:drawable/stat_sys_download"
+            android:src="@drawable/ic_download_custom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/text_white" />
@@ -61,45 +73,47 @@
             android:layout_height="32dp"
             android:layout_margin="8dp"
             android:background="@drawable/circle_background"
-            android:padding="6dp"
+            android:padding="7dp"
             android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_menu_more"
+            android:src="@drawable/ic_more_custom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btnDownloadItem"
             app:tint="@color/text_white" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvSongTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/text_white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/imgSongThumbnail"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgSongThumbnail">
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="Song Title" />
 
-            <TextView
-                android:id="@+id/tvSongTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@color/text_white"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="Song Title" />
-
-            <TextView
-                android:id="@+id/tvSongArtist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@color/purple_primary"
-                android:textSize="12sp"
-                tools:text="Artist Name" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tvSongArtist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/purple_primary"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@id/tvSongTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="Artist Name" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

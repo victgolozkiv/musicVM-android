@@ -1,48 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/pure_black">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvHomeHeader"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="24dp">
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="30dp"
+        android:text="@string/home_greeting"
+        android:textColor="@color/purple_primary"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvHomeHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="32dp"
-            android:text="Para ti"
-            android:textColor="@color/text_white"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <!-- MAIN GRID: RECOMENDADOS -->
+    <TextView
+        android:id="@+id/tvMainTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/para_ti_title"
+        android:textColor="@color/text_white"
+        android:textSize="20sp"
+        android:fontFamily="sans-serif-black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHomeHeader" />
 
-        <View
-            android:id="@+id/accentLine"
-            android:layout_width="40dp"
-            android:layout_height="4dp"
-            android:layout_marginTop="4dp"
-            android:background="@color/purple_primary"
-            app:layout_constraintStart_toStartOf="@id/tvHomeHeader"
-            app:layout_constraintTop_toBottomOf="@id/tvHomeHeader" />
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/homeProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="@color/purple_primary"
+        app:layout_constraintTop_toBottomOf="@id/tvMainTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:clipToPadding="false"
-            android:nestedScrollingEnabled="false"
-            android:padding="8dp"
-            app:layout_constraintTop_toBottomOf="@id/accentLine"
-            tools:listitem="@layout/item_song" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="8dp"
+        android:paddingBottom="120dp"
+        app:layout_constraintTop_toBottomOf="@id/tvMainTitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/item_song" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

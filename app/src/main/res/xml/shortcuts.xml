@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <capability android:name="actions.intent.PLAY_MEDIA">
+        <intent
+            android:action="android.media.action.MEDIA_PLAY_FROM_SEARCH"
+            android:targetPackage="com.musicplayer"
+            android:targetClass="com.musicplayer.ui.MainActivity">
+            <parameter
+                android:name="media.query"
+                android:key="query" />
+        </intent>
+    </capability>
+</shortcuts>

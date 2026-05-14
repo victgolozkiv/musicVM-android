@@ -1,3 +1,18 @@
 <resources>
-    <string name="app_name">musicVM</string>
+    <string name="app_name">musicMV</string>
+    <string name="search_hint">Buscar artistas o canciones</string>
+    <string name="home_greeting">Buenos días</string>
+    <string name="para_ti_title">Para ti (Mezcla Diaria)</string>
+    <string name="playing_now">Reproduciendo</string>
+    <string name="lyrics_label">Letras</string>
+    <string name="downloads_title">Descargas</string>
+    <string name="local_files">Archivos Locales</string>
+    <string name="remote_cache">Caché Remoto</string>
+    <string name="no_downloads">No hay canciones descargadas</string>
+    <string name="my_playlists">Mis Playlists</string>
+    <string name="new_playlist">+ Nueva</string>
+    <string name="playlist_name_placeholder">Nombre de Playlist</string>
+    <string name="empty_playlist">Esta playlist está vacía</string>
+    <string name="next_in_queue">Siguiente en la cola</string>
+    <string name="time_zero">0:00</string>
 </resources>

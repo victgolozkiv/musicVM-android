@@ -11,14 +11,16 @@
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:hint="Buscar artistas o canciones"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:hint="@string/search_hint"
         android:textColorHint="#B3FFFFFF"
         app:boxStrokeColor="@android:color/white"
         app:endIconMode="clear_text"
         app:endIconTint="@android:color/white"
         app:hintTextColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnVoiceSearch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:startIconDrawable="@android:drawable/ic_menu_search"
@@ -33,6 +35,31 @@
             android:textColor="@android:color/white" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <ImageButton
+        android:id="@+id/btnVoiceSearch"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Búsqueda por voz"
+        android:src="@android:drawable/ic_btn_speak_now"
+        app:layout_constraintBottom_toBottomOf="@id/searchLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/searchLayout"
+        app:tint="@color/purple_primary" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDownloadSelected"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Descargar Seleccionados (0)"
+        android:visibility="gone"
+        app:icon="@drawable/ic_download_custom"
+        app:layout_constraintTop_toBottomOf="@id/searchLayout" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchRecyclerView"
         android:layout_width="0dp"
@@ -42,15 +69,30 @@
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/searchLayout"
+        app:layout_constraintTop_toBottomOf="@id/btnDownloadSelected"
+        app:layout_constraintVertical_bias="1.0"
         tools:listitem="@layout/item_song" />
 
-    <ProgressBar
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/suggestionsRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#1A1A1A"
+        android:visibility="gone"
+        android:elevation="8dp"
+        app:layout_constraintEnd_toEndOf="@id/searchLayout"
+        app:layout_constraintStart_toStartOf="@id/searchLayout"
+        app:layout_constraintTop_toBottomOf="@id/searchLayout" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/searchProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:indeterminate="true"
         android:visibility="gone"
+        app:indicatorColor="@color/purple_primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
