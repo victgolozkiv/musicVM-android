@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Music</string>
+    <string name="app_name">MusicVM</string>
     <string name="search_hint">Search artists or songs</string>
     <string name="home_greeting">Good Morning</string>
     <string name="para_ti_title">For You (Daily Mix)</string>

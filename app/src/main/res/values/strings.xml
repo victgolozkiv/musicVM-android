@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">musicMV</string>
+    <string name="app_name">MusicVM</string>
     <string name="search_hint">Buscar artistas o canciones</string>
     <string name="home_greeting">Buenos días</string>
     <string name="para_ti_title">Para ti (Mezcla Diaria)</string>
