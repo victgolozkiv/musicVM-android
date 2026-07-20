@@ -1,5 +1,6 @@
 # 🎵 Native Android Music Player (Premium Media3)
-
+nota:
+la canciones pueden demorar 5 segundos en inicarse recomiendo utilizar esto mas que nada como para instalar las canciones pero igual es funcional 
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white)
 ![Media3](https://img.shields.io/badge/Media3-ExoPlayer-blue?style=for-the-badge)
